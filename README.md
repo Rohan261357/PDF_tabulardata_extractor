@@ -1,0 +1,59 @@
+PDF _tabular data extractor 
+
+1. Libraries Used
+pdfplumber: Extracts text from PDF pages.
+pandas: For DataFrame manipulation.
+openai: To call GPT-based models.
+json, re: For parsing and cleaning JSON from LLM responses.
+
+####  Functional Flow
+
+Step 1: PDF Text Extraction
+
+Function: pdf_to_llm_input(pdf_file)
+Opens the PDF using pdfplumber.
+Iterates over pages, extracts text, and appends it line-by-line into a single string.
+Output: A raw string of text from the PDF.
+
+
+Step 2: LLM Table Extraction
+
+Function: llm_table_extraction(pdf_text)
+Defines a structured prompt to instruct the LLM to:
+Extract all tables.
+Return them in strict JSON format.
+Uses OpenAI’s chat.completions.create API with the gpt-4 model.
+Cleans LLM response using regex to remove backticks or other markdown artifacts.
+Validates and parses the cleaned JSON string.
+
+Important Points:
+
+Uses a strict schema: JSON only, with tables, columns, and rows keys.
+Adds a system prompt: “You are a JSON formatting expert.”
+Catches errors like invalid JSON or missing keys.
+
+Step 3: Convert JSON to DataFrames
+
+Function: llm_to_dataframes(llm_output)
+Iterates through all tables in the JSON.
+Converts each into a Pandas DataFrame.
+Saves each DataFrame as a separate CSV.
+Also stores each DataFrame as a global variable df1, df2, ...
+
+Step 4: Output Summary
+
+Prints number of tables extracted.
+Shows head() of each table for quick viewing.
+
+
+Summary Diagram
+
+PDF File
+   ↓
+[pdfplumber] — Extract Text
+   ↓
+Text Prompt → [OpenAI GPT-4] → JSON Tables
+   ↓
+[json.loads + pandas] — Convert to DataFrames
+   ↓
+Save CSVs + Print Table Heads
